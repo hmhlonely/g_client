@@ -3,20 +3,21 @@ const proto_mgr = require("./proto_mgr");
 let websocket = {
     sock: null,
     /** 消息处理的回调函数 */
-    cmd_handler: null,
+    serivces_handler: null,
     proto_type: 0,
     is_connected: false,
 
     /** 链接成功 */
-    _on_opened: function (session) {
+    _on_opened: function (event) {
         let self = this;
         console.log("ws connect server success !")
         self.is_connected = true;
     },
     /** 接收到数据 */
-    _on_recv_data: function (str_or_buf) {
+    _on_recv_data: function (event) {
+        let str_or_buf = event.data;
         let self = this;
-        if (!self.cmd_handler) {
+        if (!self.serivces_handler) {
             return;
         }
         let cmd = proto_mgr.decode_cmd(self.proto_type, str_or_buf);
@@ -24,20 +25,20 @@ let websocket = {
             return;
         }
         let stype = cmd[0];
-        if (self.cmd_handler[stype]) {
+        if (self.serivces_handler[stype]) {
             let ctype = cmd[1];
-            self.cmd_handler[stype](stype, ctype, cmd[2]);
+            self.serivces_handler[stype](stype, ctype, cmd[2]);
         }
     },
     /** 断开连接 */
-    _on_socket_close: function (session) {
+    _on_socket_close: function (event) {
         let self = this;
         if (self.sock) {
             self.close();
         }
     },
     /** 出错 */
-    _on_socket_err: function (session) {
+    _on_socket_err: function (event) {
         let self = this;
         self.close();
     },
@@ -47,7 +48,7 @@ let websocket = {
         let sock = new WebSocket(url);
         self.sock = sock;
         sock.onopen = self._on_opened.bind(self);
-        sock.onmessage = self._on_recv_data(self);
+        sock.onmessage = self._on_recv_data.bind(self);
         sock.onerror = self._on_socket_err.bind(self);
         sock.onclose = self._on_socket_close.bind(self);
         self.proto_type = proro_type;
@@ -63,6 +64,7 @@ let websocket = {
     send_cmd: function (stype, ctype, body) {
         let self = this;
         if (!self.sock || !self.is_connected) {
+            console.log("没有链接退出")
             return;
         }
         let buf = proto_mgr.encode_cmd(self.proto_type, stype, ctype, body);
@@ -77,12 +79,12 @@ let websocket = {
         }
     },
     /** 注册消息处理的回调函数 */
-    register_cmd_hander: function (cmd_handler) {
+    register_serivces_hander: function (serivces_handler) {
         let self = this;
-        self.cmd_handler = cmd_handler;
+        self.serivces_handler = serivces_handler;
     },
 }
-websocket.connect("ws://127.0.0.1:7082/ws", proto_mgr.PROTO_BUFF);
-// websocket.connect("ws://127.0.0.1:7083/ws", proto_mgr.PROTO_JSON);
+// websocket.connect("ws://127.0.0.1:7082/ws", proto_mgr.PROTO_BUFF);
+websocket.connect("ws://127.0.0.1:7083/ws", proto_mgr.PROTO_JSON);
 
 module.exports = websocket;
