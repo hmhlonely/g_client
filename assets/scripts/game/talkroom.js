@@ -47,19 +47,19 @@ cc.Class({
                 console.log("TalkCmd.Enter: ", body);
             } break;
             case TalkCmd.Exit: {
-
+                console.log("TalkCmd.Exit: ", body);
             } break;
             case TalkCmd.UserArrrived: {
-
+                console.log("UserArrrived：", body);
             } break;
             case TalkCmd.UserExit: {
-
+                console.log("UserExit", body);
             } break;
             case TalkCmd.SendMsg: {
-
+                console.log("SendMsg：", body);
             } break;
             case TalkCmd.UserMsg: {
-
+                console.log("UserMsg", body);
             } break;
 
         }
@@ -75,6 +75,10 @@ cc.Class({
             uname: "black" + Math.floor(1 + Math.random() * 10),
             usex: 1,
         })
+        this.schedule(function () {
+            websocket.send_cmd(STYPE_TALKROOM, TalkCmd.SendMsg, "hello world");
+        }.bind(this), 3)
+        // websocket.send_cmd(STYPE_TALKROOM, TalkCmd.Exit, null);
     }
 
     // update (dt) {},
