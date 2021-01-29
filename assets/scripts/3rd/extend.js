@@ -54,7 +54,7 @@ DataView.prototype.read_utf8 = function(offset, byte_length) {
     var dataview = this;
 
     out = "";
-    len = byte_length;
+    len = offset + byte_length;
     i = offset;
     while(i < len) {
         c = dataview.getUint8(i);

@@ -1,3 +1,5 @@
+const proto_tools = require("./proto_tools");
+
 const log = {
     info: console.log,
     error: console.error,
@@ -88,7 +90,9 @@ function encode_cmd(proto_type, stype, ctype, body) {
         if (!encoders[key]) {
             return null;
         }
-        buf = encoders[key](body);
+        // buf = encoders[key](stype, ctype, body);
+        let dataview = encoders[key](stype, ctype, body);
+        buf = dataview.buffer;
     }
     //加密
     buf = encrypt_cmd(buf);
@@ -110,13 +114,15 @@ function decode_cmd(proto_type, str_or_buf) {
         return null;
     }
     //buf协议
-    let stype = str_or_buf.readUInt16LE(0);
-    let ctype = str_or_buf.readUInt16LE(2);
+    let dataview = new DataView(str_or_buf);
+    let stype = proto_tools.read_int16(dataview, 0);
+    let ctype = proto_tools.read_int16(dataview, 2);
     let key = get_key(stype, ctype);
     if (!decoders[key]) {
         return null;
     }
-    let cmd = decoders[key](str_or_buf);
+    // let cmd = decoders[key](str_or_buf);
+    let cmd = decoders[key](dataview);
     return cmd;
 }
 

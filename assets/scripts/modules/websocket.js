@@ -46,6 +46,7 @@ let websocket = {
     connect: function (url, proro_type) {
         let self = this;
         let sock = new WebSocket(url);
+        sock.binaryType = "arraybuffer";
         self.sock = sock;
         sock.onopen = self._on_opened.bind(self);
         sock.onmessage = self._on_recv_data.bind(self);
