@@ -85,7 +85,7 @@ let websocket = {
         self.serivces_handler = serivces_handler;
     },
 }
-// websocket.connect("ws://127.0.0.1:7082/ws", proto_mgr.PROTO_BUFF);
-websocket.connect("ws://127.0.0.1:7083/ws", proto_mgr.PROTO_JSON);
+websocket.connect("ws://127.0.0.1:7082/ws", proto_mgr.PROTO_BUFF);
+// websocket.connect("ws://127.0.0.1:7083/ws", proto_mgr.PROTO_JSON);
 
 module.exports = websocket;
