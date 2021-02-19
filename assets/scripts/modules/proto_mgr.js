@@ -51,23 +51,26 @@ function decrypt_cmd(str_or_buf) {
  */
 function _json_encode(stype, ctype, body) {
     let cmd = {};
-    cmd[0] = stype;
-    cmd[1] = ctype;
-    cmd[2] = body;
-    return JSON.stringify(cmd);
+    cmd[0] = body;
+    let str = JSON.stringify(cmd);
+    let cmd_buf = proto_tools.encode_str_cmd(stype, ctype, str);
+    return cmd_buf;
 }
 /**
  * json解码 
- * @param {*} cmd_json 数据
+ * @param {*} cmd_buf 数据
  */
-function _json_decode(cmd_json) {
-    let cmd = null;
+function _json_decode(cmd_buf) {
+    let cmd = proto_tools.decode_str_cmd(cmd_buf);
+    let cmd_json = cmd[2];
     try {
-        cmd = JSON.parse(cmd_json);
+        let body_set = JSON.parse(cmd_json);
+        cmd[2] = body_set[0];
     } catch (e) {
         log.error(e);
+        return null;
     }
-    if (!cmd || !cmd[0] || !cmd[1] || !cmd[2]) {
+    if (!cmd || !cmd[0] || !cmd[1]) {
         return null;
     }
     return cmd;
@@ -81,9 +84,9 @@ function _json_decode(cmd_json) {
  */
 function encode_cmd(proto_type, stype, ctype, body) {
     let buf = null;
+    let dataview;
     if (proto_type == proto_mgr.PROTO_JSON) {
-        let str = _json_encode(stype, ctype, body);
-        return encrypt_cmd(str);
+        dataview = _json_encode(stype, ctype, body);
     } else {
         //buf协议
         let key = get_key(stype, ctype);
@@ -91,11 +94,13 @@ function encode_cmd(proto_type, stype, ctype, body) {
             return null;
         }
         // buf = encoders[key](stype, ctype, body);
-        let dataview = encoders[key](stype, ctype, body);
-        buf = dataview.buffer;
+        dataview = encoders[key](stype, ctype, body);
     }
     //加密
-    buf = encrypt_cmd(buf);
+    buf = dataview.buffer;
+    if (buf) {
+        buf = encrypt_cmd(buf);
+    }
     return buf;
 }
 /**
@@ -106,15 +111,15 @@ function encode_cmd(proto_type, stype, ctype, body) {
 function decode_cmd(proto_type, str_or_buf) {
     //解密
     str_or_buf = decrypt_cmd(str_or_buf);
+    let dataview = new DataView(str_or_buf);
     //json协议
     if (proto_type == proto_mgr.PROTO_JSON) {
-        return _json_decode(str_or_buf);
+        return _json_decode(dataview);
     }
-    if (str_or_buf.length < 4) {
-        return null;
-    }
+    // if (dataview.byteLength < 4) {
+    //     return null;
+    // }
     //buf协议
-    let dataview = new DataView(str_or_buf);
     let stype = proto_tools.read_int16(dataview, 0);
     let ctype = proto_tools.read_int16(dataview, 2);
     let key = get_key(stype, ctype);

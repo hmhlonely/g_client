@@ -170,7 +170,7 @@ function encode_str_cmd(stype, ctype, str) {
     let cmd_buf = alloc_buffer(total_len);
 
     let offset = write_cmd_header_inbuf(cmd_buf, stype, ctype, byte_len);
-    offset = write_str_inbuf(cmd_buf, offset, str);
+    offset = write_str_inbuf(cmd_buf, offset, str,byte_len);
     return cmd_buf;
 }
 /** 解码字符串 */
