@@ -116,7 +116,7 @@ function decode_cmd(proto_type, str_or_buf) {
     if (proto_type == proto_mgr.PROTO_JSON) {
         return _json_decode(dataview);
     }
-    // if (dataview.byteLength < 4) {
+    // if (dataview.byteLength < proto_tools.header_size) {
     //     return null;
     // }
     //buf协议
