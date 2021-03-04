@@ -96,6 +96,7 @@ function encode_cmd(proto_type, stype, ctype, body) {
         // buf = encoders[key](stype, ctype, body);
         dataview = encoders[key](stype, ctype, body);
     }
+    proto_tools.write_prorotype_inbuf(dataview, proto_type);
     //加密
     buf = dataview.buffer;
     if (buf) {
