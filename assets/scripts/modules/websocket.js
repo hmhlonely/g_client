@@ -15,6 +15,7 @@ let websocket = {
     },
     /** 接收到数据 */
     _on_recv_data: function (event) {
+        console.log("收到数据：", event.data);
         let str_or_buf = event.data;
         let self = this;
         if (!self.serivces_handler) {
