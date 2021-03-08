@@ -1,25 +1,25 @@
-var proto_mgr = require("../../modules/proto_mgr");
-var proto_tools = require("../../modules/proto_tools");
+var proto_man = require("proto_man");
+var proto_tools = require("proto_tools");
 
 
 var STYPE_TALKROOM = 1;
 
 var TalkCmd = {
-	Enter: 1, // 用户进来
-	Exit: 2, // 用户离开ia
-	UserArrived: 3, // 别人进来;
-	UserExit: 4, // 别人离开
+    Enter: 1, // 用户进来
+    Exit: 2, // 用户离开ia
+    UserArrived: 3, // 别人进来;
+    UserExit: 4, // 别人离开
 
-	SendMsg: 5, // 自己发送消息,
-	UserMsg: 6, // 收到别人的消息
+    SendMsg: 5, // 自己发送消息,
+    UserMsg: 6, // 收到别人的消息
 };
 
 var Respones = {
-	OK: 1,
-	IS_IN_TALKROOM: -100, // 玩家已经在聊天室
-	NOT_IN_TALKROOM: -101, // 玩家不在聊天室
-	INVALD_OPT: -102, // 玩家非法操作
-	INVALID_PARAMS: -103, // 命令格式不对
+    OK: 1,
+    IS_IN_TALKROOM: -100, // 玩家已经在聊天室
+    NOT_IN_TALKROOM: -101, // 玩家不在聊天室
+    INVALD_OPT: -102, // 玩家非法操作
+    INVALID_PARAMS: -103, // 命令格式不对
 };
 
 
@@ -27,8 +27,8 @@ var Respones = {
 enter:
 客户端: 进入聊天室
 1, 1, body = {
-	uname: "名字",
-	usex: 0 or 1, // 性别
+    uname: "名字",
+    usex: 0 or 1, // 性别
 };
 返回:
 1, 1, status = OK;
@@ -43,29 +43,29 @@ exit
 1, 5, body = "消息内容"
 返回
 1, 5, body = {
-	0: status, OK, 失败的状态码
-	1: uname,
-	2: usex,
-	3: msg, // 消息内容
+    0: status, OK, 失败的状态码
+    1: uname,
+    2: usex,
+    3: msg, // 消息内容
 }
 
 UserMsg: 服务器主动发送
 1, 6, body = {
-	0: uname,
-	1: usex
-	2: msg,
+    0: uname,
+    1: usex
+    2: msg,
 };
 
 UserExit: 主动发送
 1, 4, body = uinfo {
-	uname: "名字",
-	usex: 0, 1 // 性别
+    uname: "名字",
+    usex: 0, 1 // 性别
 } 
 
 UserEnter: 主动发送
 1, 3, body = uinfo{
-	uname: "名字",
-	usex: 0 or 1, // 性别
+    uname: "名字",
+    usex: 0 or 1, // 性别
 }
 */
 
@@ -77,7 +77,7 @@ function decode_user_enter(cmd_buf) {
 
     var body = {};
     cmd[2] = body;
-    
+
     // uname
     var ret = proto_tools.read_str_inbuf(cmd_buf, offset);
     body.uname = ret[0];
@@ -88,7 +88,7 @@ function decode_user_enter(cmd_buf) {
     offset += 2;
     return cmd;
 }
-proto_mgr.reg_decoder(1, 3, decode_user_enter);
+proto_man.reg_decoder(1, 3, decode_user_enter);
 
 function decode_user_exit(cmd_buf) {
     var cmd = {};
@@ -98,7 +98,7 @@ function decode_user_exit(cmd_buf) {
 
     var body = {};
     cmd[2] = body;
-    
+
     // uname
     var ret = proto_tools.read_str_inbuf(cmd_buf, offset);
     body.uname = ret[0];
@@ -109,7 +109,7 @@ function decode_user_exit(cmd_buf) {
     offset += 2;
     return cmd;
 }
-proto_mgr.reg_decoder(1, 4, decode_user_exit);
+proto_man.reg_decoder(1, 4, decode_user_exit);
 
 
 function encode_enter_talkroom(stype, ctype, body) {
@@ -122,11 +122,11 @@ function encode_enter_talkroom(stype, ctype, body) {
     proto_tools.write_int16(cmd_buf, offset, body.usex);
     return cmd_buf;
 }
-proto_mgr.reg_encoder(1, 1, encode_enter_talkroom);
-proto_mgr.reg_decoder(1, 1, proto_tools.decode_status_cmd);
+proto_man.reg_encoder(1, 1, encode_enter_talkroom);
+proto_man.reg_decoder(1, 1, proto_tools.decode_status_cmd);
 
-proto_mgr.reg_encoder(1, 2, proto_tools.encode_empty_cmd);
-proto_mgr.reg_decoder(1, 2, proto_tools.decode_status_cmd);
+proto_man.reg_encoder(1, 2, proto_tools.encode_empty_cmd);
+proto_man.reg_decoder(1, 2, proto_tools.decode_status_cmd);
 
 function decode_send_msg(cmd_buf) {
     var cmd = {};
@@ -156,11 +156,11 @@ function decode_send_msg(cmd_buf) {
     ret = proto_tools.read_str_inbuf(cmd_buf, offset);
     body[3] = ret[0];
     // 
-    
+
     return cmd;
 }
-proto_mgr.reg_encoder(1, 5, proto_tools.encode_str_cmd);
-proto_mgr.reg_decoder(1, 5, decode_send_msg);
+proto_man.reg_encoder(1, 5, proto_tools.encode_str_cmd);
+proto_man.reg_decoder(1, 5, decode_send_msg);
 
 function decode_user_msg(cmd_buf) {
     var cmd = {};
@@ -186,10 +186,10 @@ function decode_user_msg(cmd_buf) {
 
     return cmd;
 }
-proto_mgr.reg_decoder(1, 6, decode_user_msg);
+proto_man.reg_decoder(1, 6, decode_user_msg);
 
 module.exports = {
-    stype: 1, 
+    stype: 1,
     cmd: TalkCmd,
     respones: Respones,
 };
